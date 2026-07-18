@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Churn Intelligence — European Retail Banking</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+
+<header class="nav">
+  <div class="nav-inner">
+    <div class="brand"><span class="dot"></span> <b>Churn Intelligence</b> · European Retail Banking</div>
+    <nav class="links" id="navLinks">
+      <a href="#overview" class="active">Overview</a>
+      <a href="#geography">Geography</a>
+      <a href="#demographics">Age &amp; Tenure</a>
+      <a href="#high-value">High-Value</a>
+      <a href="#explorer">Explorer</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- HERO -->
+  <section class="hero" id="overview">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">Segmentation-driven churn analytics</div>
+        <h1>Where retail banking customers <em>quietly leave</em>, before they formally close the account.</h1>
+        <p class="lede">10,000 customer records across France, Spain and Germany, segmented by geography, age, tenure, credit standing and balance — built to surface which groups drive attrition, not just how much of it exists.</p>
+        <div class="hero-tags">
+          <span class="tag">10,000 customers</span>
+          <span class="tag">3 markets</span>
+          <span class="tag">11 features</span>
+          <span class="tag">Live filtering</span>
+        </div>
+      </div>
+      <div class="gauge-card">
+        <div class="gauge-top">
+          <span class="gauge-label">Overall churn rate</span>
+          <span class="gauge-label" id="heroCount">10,000 records</span>
+        </div>
+        <div class="gauge-flex">
+          <div class="gauge-num" id="heroChurnRate">20.4<span>%</span></div>
+          <div class="gauge-wrap"><canvas id="heroGauge"></canvas></div>
+        </div>
+        <div class="gauge-sub">Germany runs nearly <b style="color:var(--paper)">2×</b> the churn rate of France and Spain — the single largest geographic risk signal in the book.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar" id="filterBar">
+    <div class="filter-group">
+      <label>Geography</label>
+      <div class="chip-row" id="f-geo">
+        <button class="chip on" data-val="FR">France</button>
+        <button class="chip on" data-val="ES">Spain</button>
+        <button class="chip on" data-val="DE">Germany</button>
+      </div>
+    </div>
+    <div class="filter-group">
+      <label>Age band</label>
+      <div class="chip-row" id="f-age">
+        <button class="chip on" data-val="0">&lt;30</button>
+        <button class="chip on" data-val="1">30–45</button>
+        <button class="chip on" data-val="2">46–60</button>
+        <button class="chip on" data-val="3">60+</button>
+      </div>
+    </div>
+    <div class="filter-group">
+      <label>Tenure</label>
+      <div class="chip-row" id="f-ten">
+        <button class="chip on" data-val="0">New (0–2y)</button>
+        <button class="chip on" data-val="1">Mid (3–6y)</button>
+        <button class="chip on" data-val="2">Long (7–10y)</button>
+      </div>
+    </div>
+    <div class="filter-group">
+      <label>Balance segment</label>
+      <div class="chip-row" id="f-bal">
+        <button class="chip on" data-val="0">Zero</button>
+        <button class="chip on" data-val="1">Low</button>
+        <button class="chip on" data-val="2">High</button>
+      </div>
+    </div>
+    <div class="filter-group">
+      <label>Gender</label>
+      <div class="chip-row" id="f-gen">
+        <button class="chip on" data-val="F">Female</button>
+        <button class="chip on" data-val="M">Male</button>
+      </div>
+    </div>
+    <span class="filter-count" id="filterCount"></span>
+    <button class="filter-reset" id="resetFilters">Reset filters</button>
+  </div>
+
+  <!-- KPI STRIP -->
+  <section style="padding-top:0;">
+    <div class="kpi-strip" id="kpiStrip">
+      <div class="kpi">
+        <div class="kpi-label">Overall churn rate</div>
+        <div class="kpi-val rust" id="kpi-overall">—</div>
+        <div class="kpi-delta" id="kpi-overall-d">of filtered cohort</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">High-value churn rate</div>
+        <div class="kpi-val gold" id="kpi-hv">—</div>
+        <div class="kpi-delta" id="kpi-hv-d">balance ≥ €100k</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Geographic risk index</div>
+        <div class="kpi-val" id="kpi-geo">—</div>
+        <div class="kpi-delta" id="kpi-geo-d">highest ÷ lowest market</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Engagement drop indicator</div>
+        <div class="kpi-val teal" id="kpi-eng">—</div>
+        <div class="kpi-delta" id="kpi-eng-d">inactive vs active churn</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Filtered cohort</div>
+        <div class="kpi-val" id="kpi-n">—</div>
+        <div class="kpi-delta" id="kpi-n-d">customers in view</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GEOGRAPHY -->
+  <section id="geography">
+    <div class="eyebrow">Segment 01</div>
+    <h2 class="section-title">Churn differs sharply by market</h2>
+    <p class="section-sub">Germany concentrates risk despite holding a smaller book than France — geography alone explains more variance in churn than any other single field.</p>
+
+    <div class="grid-2" style="margin-bottom:20px;">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Churn rate by country</span>
+          <span class="panel-note">% of segment exited</span>
+        </div>
+        <div class="chart-box"><canvas id="chartGeoBar"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Book composition</span>
+          <span class="panel-note">customers by market</span>
+        </div>
+        <div class="chart-box"><canvas id="chartGeoDonut"></canvas></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Risk spectrum</span>
+        <span class="panel-note">churn rate positioned against book-wide average</span>
+      </div>
+      <div id="spectrumRows"></div>
+    </div>
+  </section>
+
+  <!-- DEMOGRAPHICS -->
+  <section id="demographics">
+    <div class="eyebrow">Segment 02</div>
+    <h2 class="section-title">Age, tenure and credit standing</h2>
+    <p class="section-sub">Mid-career customers with early-stage tenure churn hardest; loyalty compounds after year six regardless of age.</p>
+
+    <div class="grid-2" style="margin-bottom:20px;">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Churn rate by age band</span>
+          <span class="panel-note">%</span>
+        </div>
+        <div class="chart-box"><canvas id="chartAge"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Churn rate by tenure group</span>
+          <span class="panel-note">%</span>
+        </div>
+        <div class="chart-box"><canvas id="chartTenure"></canvas></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Age × tenure churn heatmap</span>
+          <span class="panel-note">darker = higher churn</span>
+        </div>
+        <div class="heatmap" id="heatmapGrid"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Credit score bands</span>
+          <span class="panel-note">churn rate by standing</span>
+        </div>
+        <div class="chart-box"><canvas id="chartCredit"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HIGH VALUE -->
+  <section id="high-value">
+    <div class="eyebrow">Segment 03</div>
+    <h2 class="section-title">High-value customer churn</h2>
+    <p class="section-sub">Customers holding balances above €100k represent the largest revenue-at-risk pool — they don't churn more often, but each departure costs more.</p>
+
+    <div class="grid-3" style="margin-bottom:20px;">
+      <div class="stat-card">
+        <div class="kpi-label">High-value cohort</div>
+        <div class="kpi-val gold" id="hv-count">—</div>
+        <div class="kpi-delta" id="hv-count-d">of filtered customers</div>
+      </div>
+      <div class="stat-card">
+        <div class="kpi-label">Revenue at risk (balance)</div>
+        <div class="kpi-val rust" id="hv-revenue">—</div>
+        <div class="kpi-delta">held by churned high-value customers</div>
+      </div>
+      <div class="stat-card">
+        <div class="kpi-label">Avg. products held</div>
+        <div class="kpi-val teal" id="hv-products">—</div>
+        <div class="kpi-delta" id="hv-products-d">churned vs retained</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Balance vs. estimated salary</span>
+        <span class="panel-note">each dot is a customer · rust = churned</span>
+      </div>
+      <div class="chart-box tall"><canvas id="chartScatter"></canvas></div>
+    </div>
+  </section>
+
+  <!-- EXPLORER -->
+  <section id="explorer">
+    <div class="eyebrow">Segment 04</div>
+    <h2 class="section-title">Customer explorer</h2>
+    <p class="section-sub">Drill into individual records within the active filter set. Search, sort and page through the live cohort.</p>
+
+    <div class="panel">
+      <div class="explorer-controls">
+        <input type="text" class="search-input" id="explorerSearch" placeholder="Search by geography, gender, or credit score, e.g. Germany, Female, 700...">
+        <select class="sort-select" id="explorerSort">
+          <option value="balance-desc">Sort: Balance (high → low)</option>
+          <option value="balance-asc">Sort: Balance (low → high)</option>
+          <option value="salary-desc">Sort: Salary (high → low)</option>
+          <option value="age-desc">Sort: Age (old → young)</option>
+          <option value="credit-asc">Sort: Credit score (low → high)</option>
+          <option value="churn-first">Sort: Churned first</option>
+        </select>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="explorer">
+          <thead>
+            <tr>
+              <th>Geography</th><th>Gender</th><th>Age</th><th>Tenure</th>
+              <th>Credit score</th><th>Balance</th><th>Products</th><th>Salary</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="explorerBody"></tbody>
+        </table>
+      </div>
+      <div class="pager">
+        <span id="pagerInfo"></span>
+        <div style="display:flex; gap:8px;">
+          <button id="pagerPrev">← Prev</button>
+          <button id="pagerNext">Next →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap foot-grid">
+    <div class="brand"><span class="dot"></span> Customer Segmentation &amp; Churn Pattern Analytics — European Banking</div>
+    <div class="foot-links">
+      <a href="#overview">Overview</a>
+      <a href="#geography">Geography</a>
+      <a href="#demographics">Demographics</a>
+      <a href="#high-value">High-value</a>
+      <a href="#explorer">Explorer</a>
+    </div>
+  </div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/chart.umd.js') }}"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
